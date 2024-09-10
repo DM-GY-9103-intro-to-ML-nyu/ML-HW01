@@ -23,7 +23,8 @@ def draw():
     
 
 
-"""
+""" original JS file:
+
 let diamSmall = 10;
 let diamLarge = 3 * diamSmall;
 
