@@ -2,18 +2,18 @@
 class FadingWord:
     def setup(self, word, word_delay):
         self.word = word
-        self.alpha = 255  # Start fully opaque
-        self.start_time = millis()  # Start time for fading
-        self.letter_delay = word_delay / len(self.word)  # Delay per letter
+        self.alpha = 255  
+        self.start_time = millis()
+        self.letter_delay = word_delay / len(self.word)
 
-        # Default values
+
         self.red = 0
         self.font = "sans-serif"
         self.size = min_text_size
         self.y_offset = 0
         self.fade_vel = -0.3  # How fast it fades
 
-        # Special case for "glitch" or random chance
+
         if self.word.lower() == "glitch" or random() > 0.95:
             self.word = self.word.upper()
             self.red = 200
@@ -22,12 +22,9 @@ class FadingWord:
             self.y_offset = -self.size / 6
             self.fade_vel = -0.01
 
-        # Set the text properties and word width
         text_font(self.font)
         text_size(self.size)
         self.width = text_width(self.word)
-
-        # Position the word
         global cx, cy
         if cx + self.width > width - margin:
             cx = margin
@@ -38,11 +35,9 @@ class FadingWord:
         self.y = cy
         cx += self.width + space_width
 
-    # Update fading effect
     def update(self):
         self.alpha += self.fade_vel
 
-    # Draw the word with fading effect
     def draw(self):
         elapsed = millis() - self.start_time
         last_letter = min(int(elapsed / self.letter_delay), len(self.word))
@@ -53,7 +48,6 @@ class FadingWord:
         text_size(self.size)
         text(letters, self.x, self.y + self.y_offset)
 
-# Setup variables
 words = ["Glitch", "is", "something", "that", "extends", "beyond", "the", "most", "literal", "technological", "mechanics"]
 margin = 40
 min_text_size = 20
@@ -66,32 +60,155 @@ space_width = text_width(" ")
 line_height = 1.5 * min_text_size
 drawn_words = []
 
-# Main draw function
 def draw():
-    # Background color
     background(220)
-
-    # Filter out invisible words
     global drawn_words
     drawn_words = [word for word in drawn_words if word.alpha > 0]
-
-    # Update and draw each word
     for word in drawn_words:
         word.update()
         word.draw()
 
-    # Add new word if time has passed
     global word_count, next_update_millis
     if millis() > next_update_millis:
         next_word_index = word_count % len(words)
         next_word = words[next_word_index]
 
-        # Create a new FadingWord
+
+
+original code: 
+// class for our agents
+class Agent {
+  // constructor to set initial agent values
+  constructor() {
+    this.x = random(17, width - 17);
+    this.y = random(17, height - 17);
+    this.vx = random(-2, 2);
+    this.vy = random(-2, 2);
+    this.radius = random(8, 16);
+    this.diam = 2 * this.radius;
+  }
+
+  // update agent position
+  update() {
+    // update position
+    this.updateByVelocity();
+    // check boundary
+    this.bounceBoundary();
+  }
+
+  // if agent gets to the edges, bounce back
+  bounceBoundary() {
+    if (this.x + this.radius >= width || this.x - this.radius <= 0) {
+      this.vx *= -1;
+    }
+    if (this.y + this.radius >= height || this.y - this.radius <= 0) {
+      this.vy *= -1;
+    }
+  }
+
+  // use velocity values to update position
+  updateByVelocity() {
+    this.x += this.vx;
+    this.y += this.vy;
+  }
+
+  // draw agent
+  drawAgent() {
+    ellipse(this.x, this.y, this.diam);
+  }
+
+  // draw based on currentMode
+  draw() {
+    if (currentMode == POINT_MODE) {
+      stroke(0);
+      this.drawPoint();
+    } else if (currentMode == OVERLAP_MODE) {
+      stroke(0, 16);
+      noFill();
+      this.drawOverlap();
+    }
+  }
+
+  // draw black point at x, y
+  drawPoint() {
+    point(this.x, this.y);
+  }
+
+
+  // draw ellipse between agents when they overlap
+  drawOverlap() {
+    for (let i = 0; i < agents.length; i++) {
+      let otherAgent = agents[i];
+      if (this != otherAgent) {
+        let tDist = dist(this.x, this.y, otherAgent.x, otherAgent.y);
+        if (tDist < this.radius + otherAgent.radius) {
+          let cx = (this.x + otherAgent.x) / 2;
+          let cy = (this.y + otherAgent.y) / 2;
+          ellipse(cx, cy, tDist);
+        }
+      }
+    }
+  }
+}
+
+// max number of agents
+let maxAgents = 32;
+
+// array for keeping track of agents
+let agents = [];
+
+// keep track of current mode
+let AGENT_MODE = 0;
+let POINT_MODE = 1;
+let OVERLAP_MODE = 2;
+
+let currentMode = AGENT_MODE;
+
+function setup() {
+  createCanvas(800, 600);
+
+  // create agents and store them in array
+  for (let i = 0; i < maxAgents; i++) {
+    agents.push(new Agent());
+  }
+}
+
+function draw() {
+  // update agents
+  for (let i = 0; i < agents.length; i++) {
+    agents[i].update();
+  }
+
+  // depending on the mode:
+  if (currentMode == AGENT_MODE) {
+    background(220, 20, 120);
+
+    // draw agents
+    noStroke();
+    fill(255);
+    for (let i = 0; i < agents.length; i++) {
+      agents[i].drawAgent();
+    }
+  } else {
+    for (let i = 0; i < agents.length; i++) {
+      agents[i].draw();
+    }
+  }
+}
+
+function mouseClicked() {
+  // cycle through modes
+  currentMode = (currentMode + 1) % 3;
+  if (currentMode != AGENT_MODE) {
+    background(255);
+  }
+}
+
+
         word_delay = random(450, 600)
         fw = FadingWord()
         fw.setup(next_word, word_delay)
         drawn_words.append(fw)
 
-        # Increment count and update time
         word_count += 1
         next_update_millis = millis() + 1.2 * word_delay
