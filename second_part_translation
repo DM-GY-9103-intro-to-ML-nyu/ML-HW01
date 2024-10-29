@@ -1,0 +1,97 @@
+
+class FadingWord:
+    def setup(self, word, word_delay):
+        self.word = word
+        self.alpha = 255  # Start fully opaque
+        self.start_time = millis()  # Start time for fading
+        self.letter_delay = word_delay / len(self.word)  # Delay per letter
+
+        # Default values
+        self.red = 0
+        self.font = "sans-serif"
+        self.size = min_text_size
+        self.y_offset = 0
+        self.fade_vel = -0.3  # How fast it fades
+
+        # Special case for "glitch" or random chance
+        if self.word.lower() == "glitch" or random() > 0.95:
+            self.word = self.word.upper()
+            self.red = 200
+            self.font = "monospace"
+            self.size = max_text_size
+            self.y_offset = -self.size / 6
+            self.fade_vel = -0.01
+
+        # Set the text properties and word width
+        text_font(self.font)
+        text_size(self.size)
+        self.width = text_width(self.word)
+
+        # Position the word
+        global cx, cy
+        if cx + self.width > width - margin:
+            cx = margin
+            cy += line_height
+            if cy > height - margin:
+                cy = margin
+        self.x = cx
+        self.y = cy
+        cx += self.width + space_width
+
+    # Update fading effect
+    def update(self):
+        self.alpha += self.fade_vel
+
+    # Draw the word with fading effect
+    def draw(self):
+        elapsed = millis() - self.start_time
+        last_letter = min(int(elapsed / self.letter_delay), len(self.word))
+        letters = self.word[:last_letter]
+
+        fill(self.red, 0, 0, self.alpha)
+        text_font(self.font)
+        text_size(self.size)
+        text(letters, self.x, self.y + self.y_offset)
+
+# Setup variables
+words = ["Glitch", "is", "something", "that", "extends", "beyond", "the", "most", "literal", "technological", "mechanics"]
+margin = 40
+min_text_size = 20
+max_text_size = 30
+cx = margin
+cy = margin
+word_count = 0
+next_update_millis = 0
+space_width = text_width(" ")
+line_height = 1.5 * min_text_size
+drawn_words = []
+
+# Main draw function
+def draw():
+    # Background color
+    background(220)
+
+    # Filter out invisible words
+    global drawn_words
+    drawn_words = [word for word in drawn_words if word.alpha > 0]
+
+    # Update and draw each word
+    for word in drawn_words:
+        word.update()
+        word.draw()
+
+    # Add new word if time has passed
+    global word_count, next_update_millis
+    if millis() > next_update_millis:
+        next_word_index = word_count % len(words)
+        next_word = words[next_word_index]
+
+        # Create a new FadingWord
+        word_delay = random(450, 600)
+        fw = FadingWord()
+        fw.setup(next_word, word_delay)
+        drawn_words.append(fw)
+
+        # Increment count and update time
+        word_count += 1
+        next_update_millis = millis() + 1.2 * word_delay
